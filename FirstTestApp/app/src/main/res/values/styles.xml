@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- the theme applied to the application or activity -->
+    <style name="CustomActionBarTheme"
+        parent="@android:style/Theme.Holo">
+        <item name="android:windowActionBarOverlay">true</item>
+
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+
+        <!-- Support library compatibility -->
+        <item name="windowActionBarOverlay">true</item>
+        <item name="actionBarStyle">@style/MyActionBar</item>
+
+    </style>
+
+    <!-- ActionBar styles NON OVERLAY(SOLID) -->
+    <style name="MyActionBar"
+        parent="@android:style/Theme.Holo">
+        <item name="android:background">@drawable/ab_transparent_example</item>
+
+        <!-- Support library compatibility -->
+        <item name="background">@drawable/ab_transparent_example</item>
+    </style>
+
+
+</resources>
