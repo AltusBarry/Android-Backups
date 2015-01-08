@@ -1,21 +1,38 @@
 package com.example.altus.listviewbasics;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.altus.models.DetailSetter;
 
+import java.util.ArrayList;
 
-public class ListDetailActivity extends Activity {
+
+public class ListDetailActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_detail);
+        fillDetail();
+    }
+
+    public void fillDetail(){
+        Bundle bundle = getIntent().getExtras();
+        String header = bundle.getString("HEADER");
+        String body = bundle.getString("BODY");
+        TextView headerText = (TextView) findViewById(R.id.textHeaderView);
+        TextView bodyText = (TextView) findViewById(R.id.textBodyView);
+        headerText.setText(header);
+        bodyText.setText(body);
     }
 
     @Override
