@@ -21,7 +21,7 @@ public class MainListActivity extends ListActivity {
 
         //NEW AFTER WORKING
         //List is a generic array class. Array list is an array implementation of a list interface
-        List<DetailSetter> messageDetails = new ArrayList<DetailSetter>();
+        ArrayList<DetailSetter> messageDetails = new ArrayList<DetailSetter>();
         // Assigns text into header and body text
         for ( int i = 0; i < 20; i++ ) {
             DetailSetter detailSetter = new DetailSetter();
@@ -31,18 +31,10 @@ public class MainListActivity extends ListActivity {
             //CURRENTLY NOT FILLING ANYWHERE
             messageDetails.add(detailSetter);
         }
-        //NOT DOING ANYTHING AS OF YET
-
-        // Define a new Adapter(DEFAULT ADAPTER)
-        // First parameter - Context
-        // Second parameter - Layout for the row (simple_list_item_1) is a inbuilt android layout,
-        //                      each row is a TextView
-        // Third parameter - ID of the TextView to which the data is written
-        // Forth - the Array of data
 
         //This is not a default Adapter
         //Currently merely creating a list of 10 items with default layout text.
-        CustomAdapter customAdapter = new CustomAdapter(this, new String[10]);
+        CustomAdapter customAdapter = new CustomAdapter(this, messageDetails);
         // Assign adapter to ListView
         setListAdapter(customAdapter);
     }
