@@ -5,85 +5,127 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.altus.models.DetailSetter;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainListActivity extends ListActivity implements Serializable{
-    private final   String filename = "listViewFile";
-    private         FileOutputStream fileOutputStream;
-    private         ObjectOutputStream objectOutputStream;
+    private final   String filename = "listViewFile.json";
     private         ArrayList<DetailSetter> messageDetails;
+    private         JSONObject jsonObject = new JSONObject();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_list);
 
-        //Write ArrayObject to file
         if(savedInstanceState == null){
-            assignNewText();
-            writeFile();
+            try {
+                assignNewText();//Assigns new text for testing.
+                writeToFile(jsonObject.getString("Msges"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }else{
-            readFile();
+            try {
+                jsonObject.put("Msges", readFromFile());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
+            try {
+                writeToListView();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         //This is not a default Adapter
         CustomAdapter customAdapter = new CustomAdapter(this, messageDetails);
         // Assign adapter to ListView
         setListAdapter(customAdapter);
     }
 
-    public void assignNewText(){
-        //List is a generic array class. Array list is an array implementation of a list interface
-        messageDetails = new ArrayList<DetailSetter>();
+    public void assignNewText() throws JSONException {
+        JSONObject jsonContents;
+        JSONArray jsonArray = new JSONArray();
         // Assigns text into header and body text
         for ( int i = 0; i < 20; i++ ) {
+            jsonContents  = new JSONObject();
+            jsonContents.put("header", ("A HEADER"+i));
+            jsonContents.put("body", ("A Body "+i));
+            jsonArray.put(jsonContents);
+        }
+        jsonObject.put("Msges", jsonArray);
+    }
+
+    private void writeToListView() throws JSONException {
+        //List is a generic array class. Array list is an array implementation of a list interface
+        messageDetails = new ArrayList<DetailSetter>();
+        Log.d("JSON LIST: ", jsonObject.toString());
+        JSONArray jsonArray = jsonObject.getJSONArray("Msges");
+        Log.d("Did it setArray:", "True");
+
+        for(int i = 0; i< jsonArray.length(); i++) {
             DetailSetter detailSetter = new DetailSetter();
-            detailSetter.setTitle("A nice header for Tweet # " +i);
-            detailSetter.setBody("Some random body text for the tweet # " +i);
+            detailSetter.setTitle(jsonArray.getJSONObject(i).getString("header"));
+            detailSetter.setBody(jsonArray.getJSONObject(i).getString("body"));
             //Assigns new text into List array that should then be used to fil each list item with text
             messageDetails.add(detailSetter);
             //Write ArrayList(messageDetails) with all the detail out to file(technically)
         }
     }
 
-    public void writeFile() {
+    private void writeToFile(String data) {
         try {
-            fileOutputStream = openFileOutput(filename, MODE_PRIVATE);
-            objectOutputStream = new ObjectOutputStream(fileOutputStream);
-            objectOutputStream.writeObject(messageDetails);
-            objectOutputStream.close();
-            fileOutputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(filename, Context.MODE_PRIVATE));
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
         }
     }
+    private String readFromFile() {
 
-    public void readFile() {
+        String ret = "";
+
         try {
-            FileInputStream fileInputStream = openFileInput(filename);
-            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-            messageDetails = (ArrayList<DetailSetter>) objectInputStream.readObject();
-            objectInputStream.close();
-            fileInputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            InputStream inputStream = openFileInput(filename);
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString;
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
         }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+        return ret;
     }
 
     protected void onListItemClick (ListView l, View v, int position, long id){
