@@ -46,7 +46,7 @@ public class MainListActivity extends ListActivity implements Serializable{
                 e.printStackTrace();
             }
         }else{
-            try {//CHeck for more economical way to do this
+            try {//Check for more economical way to do this
                 JSONTokener jsonTokener = new JSONTokener(readFromFile(filename));
                 JSONArray jsonArray = new JSONArray(jsonTokener);
                 jsonObject.put("Msges", jsonArray);
