@@ -14,5 +14,5 @@ public class DetailSetter {
     public void setBody(String bodyText){this.bodyText = bodyText;}
     public String getBody(){return this.bodyText;}
 
-    public String getId(){return getId();}
+    //public String getId(){return getId();}
 }

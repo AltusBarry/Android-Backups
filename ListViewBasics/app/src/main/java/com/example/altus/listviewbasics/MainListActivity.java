@@ -1,7 +1,6 @@
 package com.example.altus.listviewbasics;
 
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,19 +13,23 @@ import com.example.altus.models.DetailSetter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-
 public class MainListActivity extends ListActivity implements Serializable{
-    private final   String filename = "listViewFile.json";
+    private final   String filename = "altus.json";
     private         ArrayList<DetailSetter> messageDetails;
     private         JSONObject jsonObject = new JSONObject();
 
@@ -43,9 +46,14 @@ public class MainListActivity extends ListActivity implements Serializable{
                 e.printStackTrace();
             }
         }else{
-            try {
-                jsonObject.put("Msges", readFromFile());
+            try {//CHeck for more economical way to do this
+                JSONTokener jsonTokener = new JSONTokener(readFromFile(filename));
+                JSONArray jsonArray = new JSONArray(jsonTokener);
+                jsonObject.put("Msges", jsonArray);
+                Log.d("JsonOBject Reassigned", jsonObject.toString());
             } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -71,13 +79,14 @@ public class MainListActivity extends ListActivity implements Serializable{
             jsonArray.put(jsonContents);
         }
         jsonObject.put("Msges", jsonArray);
+        Log.d("INITIAL JSON OBJECT", jsonObject.toString());
     }
 
     private void writeToListView() throws JSONException {
         //List is a generic array class. Array list is an array implementation of a list interface
         messageDetails = new ArrayList<DetailSetter>();
-        Log.d("JSON LIST: ", jsonObject.toString());
         JSONArray jsonArray = jsonObject.getJSONArray("Msges");
+        Log.d("ArrayValuesAtSet", jsonArray.toString());
         Log.d("Did it setArray:", "True");
 
         for(int i = 0; i< jsonArray.length(); i++) {
@@ -91,8 +100,11 @@ public class MainListActivity extends ListActivity implements Serializable{
     }
 
     private void writeToFile(String data) {
+        File file = new File(getExternalFilesDir(null), filename);
+        Log.d("File pATH", file.getAbsolutePath());
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput(filename, Context.MODE_PRIVATE));
+            OutputStream os = new FileOutputStream(file);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(os);
             outputStreamWriter.write(data);
             outputStreamWriter.close();
         }
@@ -100,24 +112,27 @@ public class MainListActivity extends ListActivity implements Serializable{
             Log.e("Exception", "File write failed: " + e.toString());
         }
     }
-    private String readFromFile() {
 
+    private String readFromFile(String filename) {
+        File file = new File(getExternalFilesDir(null), filename);
         String ret = "";
-
         try {
-            InputStream inputStream = openFileInput(filename);
+            //InputStream inputStream = openFileInput(filename);
 
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString;
+            if ( file != null ) {
+                FileInputStream fin = new FileInputStream(file);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(fin));
                 StringBuilder stringBuilder = new StringBuilder();
 
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line).append("\n");
+                    Log.d("Line", line);
                 }
-                inputStream.close();
+                reader.close();
+                fin.close();
                 ret = stringBuilder.toString();
+                return ret;
             }
         }
         catch (FileNotFoundException e) {
